@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>weather app</title>
+    <link rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous"/>
+
+  </head>
+  <body>
+    <main>
+      <div class="container">
+        <div class="header">
+          <div class="header-icon"></div>
+          <input type="text" placeholder="Where are you located?" />
+        </div>
+      </div>
+      <div class="container">
+        <div class="forecast">
+          <div class="forecast__txt">
+            <div class="weather-img"></div>
+            <h2 class="weather" id="weather">Rain Showers</h2>
+            <p id="date-time">Monday, 12 Feb</p>
+          </div>
+          <div class="temp">
+            <h1 id="temp__txt">21deg</h1>
+            <p id="feels-like">Feels like 26deg</p>
+          </div>
+        </div>
+        <div class="air-quality">
+          <div class="air-quality-header">
+            <h2>Air Quality</h2>
+            <div class="refresh-btn" id="refresh-btn"></div>
+          </div>
+          <div class="air-details">
+            <div class="air-details-items">
+              <div class="item-img"></div>
+              <div class="item-desc">
+                <h3 id="real-feel">Real Feel</h3>
+                <p>23.8</p>
+              </div>
+            </div>
+            <div class="air-details-items">
+              <div class="item-img"></div>
+              <div class="item-desc">
+                <h3 id="wind">wind</h3>
+                <p>9km/h</p>
+              </div>
+            </div>
+            <div class="air-details-items">
+              <div class="item-img"></div>
+              <div class="item-desc">
+                <h3 id="SO2">SO2</h3>
+                <p>0.9</p>
+              </div>
+            </div>
+            <div class="air-details-items">
+              <div class="item-img"></div>
+              <div class="item-desc">
+                <h3 id="chance-of-rain">Chance of Rain</h3>
+                <p>68%</p>
+              </div>
+            </div>
+            <div class="air-details-items">
+              <div class="item-img"></div>
+              <div class="item-desc">
+                <h3 id="uv-index">UV Index</h3>
+                <p>23.8</p>
+              </div>
+            </div>
+            <div class="air-details-items">
+              <div class="item-img"></div>
+              <div class="item-desc">
+                <h3 id="O3">O3</h3>
+                <p>50</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

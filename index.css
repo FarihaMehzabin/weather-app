@@ -1,0 +1,79 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+}
+
+body {
+  background-color: rgb(238, 238, 229);
+}
+
+main {
+  box-shadow: 1px 9px 15px rgb(246, 210, 210);
+  border-radius: 10px;
+  width: 80%;
+  margin: 0 auto;
+  margin-top: 10rem;
+  padding: 5rem 0;
+  background: linear-gradient(
+    rgba(249, 150, 150, 0.096),
+    rgba(225, 35, 35, 0.072)
+  );
+  /* background-color: ; */
+}
+
+.container {
+  width: min(100%, 1000px);
+  padding: 0 2rem;
+  /* border: 1px solid red; */
+  margin: 0 auto;
+}
+
+.header-icon {
+  width: 10%;
+  padding: 2rem;
+  background: url("rain-weather-svgrepo-com.svg");
+  background-repeat: no-repeat;
+  margin: 0 auto;
+}
+
+input {
+  width: 100%;
+  margin: 1rem auto;
+  background-color: rgb(251, 235, 252);
+  height: 2rem;
+  padding: 1rem;
+  border-radius: 10px;
+}
+
+input::placeholder {
+  font-weight: 900;
+}
+
+.forecast {
+  border-radius: 10px;
+  display: flex;
+  color: white;
+  background: linear-gradient(rgb(220, 168, 177), rgb(133, 133, 205));
+
+  padding: 1rem;
+  /* background-color: beige; */
+  flex-direction: column;
+}
+
+.forecast__txt {
+  /* padding: 1rem; */
+}
+
+.air-quality {
+  border-radius: 10px;
+  padding: 1rem;
+  margin-top: 1rem;
+  background: linear-gradient(white, rgb(255, 255, 255));
+}
+
+.air-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
