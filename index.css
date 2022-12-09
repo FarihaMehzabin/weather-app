@@ -5,20 +5,36 @@
   line-height: 1.5;
 }
 
+@font-face {
+  font-family: Weather;
+  src: url("Foudy-JDYK.ttf");
+}
+
 body {
-  background-color: rgb(238, 238, 229);
+  /* background-color: rgb(163, 197, 197); */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+p{
+  font-family: 'Barlow';
+}
+
+h1,h2{
+  font-family: 'Fraunces';
 }
 
 main {
-  box-shadow: 1px 9px 15px rgb(246, 210, 210);
+  box-shadow: 1px 5px 20px rgb(20, 156, 224);
   border-radius: 10px;
   width: 80%;
-  margin: 0 auto;
-  margin-top: 10rem;
+  /* margin: 0 auto; */
+  margin-top: 17rem;
   padding: 5rem 0;
   background: linear-gradient(
-    rgba(249, 150, 150, 0.096),
-    rgba(225, 35, 35, 0.072)
+    rgba(35, 134, 176, 0.096),
+    rgba(75, 186, 241, 0.571)
   );
   /* background-color: ; */
 }
@@ -28,6 +44,14 @@ main {
   padding: 0 2rem;
   /* border: 1px solid red; */
   margin: 0 auto;
+}
+
+.header{
+  text-align: center;
+}
+
+.header h2{
+  font-family: Weather;
 }
 
 .header-icon {
@@ -45,6 +69,7 @@ input {
   height: 2rem;
   padding: 1rem;
   border-radius: 10px;
+  border: 1px solid rgb(114, 113, 113);
 }
 
 input::placeholder {
@@ -55,15 +80,32 @@ input::placeholder {
   border-radius: 10px;
   display: flex;
   color: white;
-  background: linear-gradient(rgb(220, 168, 177), rgb(133, 133, 205));
-
+  background: url("https://images.unsplash.com/photo-1579619272436-7bf4271f0bff?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2196&q=80");
+  background-repeat: no-repeat;
+  background-size: cover;
+  backdrop-filter: blur(10px);
   padding: 1rem;
   /* background-color: beige; */
   flex-direction: column;
+  animation: ani 1s linear both;
+}
+
+@keyframes ani{
+  0%{
+    opacity: 0;
+  }
+  50%{
+    opacity: .5;
+  }
+  100%{
+    opacity: 1;
+  }
 }
 
 .forecast__txt {
   /* padding: 1rem; */
+  text-shadow: 1px 1px 1px rgb(12, 12, 12);
+  text-transform:capitalize;
 }
 
 .air-quality {
