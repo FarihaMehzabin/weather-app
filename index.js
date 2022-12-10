@@ -4,6 +4,7 @@ const temp = document.getElementById("temp__txt");
 const humidity = document.getElementById("humidity__txt");
 const feels_like = document.getElementById("feels-like");
 const forecast_div = document.getElementById("forecast");
+const err_div = document.getElementById("error");
 const date_time = document.getElementById("date-time");
 const month_array = [
   "January",
@@ -44,18 +45,33 @@ console.log(day, month, weekDay)
 place.addEventListener("keydown", function (e) {
   if (e.key === "Enter") {
     date_time.textContent = `${weekDay}, ${day} ${month}`
+    err_div.classList.add("hidden")
     forecast_div.classList.remove("forecast"); // reset animation
     void forecast_div.offsetWidth; // trigger reflow
     forecast_div.classList.add("forecast"); // start animation
+
     console.log(place.value);
+
     fetch(`http://127.0.0.1:8080?city=${place.value}`)
-      .then((res) => res.json())
+      .then((res) => {
+        // console.log(res)
+        return res.json()
+    })
       .then((data) => {
+        console.log(data.status_code)
+        console.log("success")
+        console.log(data.message)
         forecast.textContent = data.weather;
         temp.textContent = `${Math.floor(data.temp)}℃`;
         humidity.textContent = `Humidity: ${data.humidity}%`;
         feels_like.textContent = `Feels like ${Math.floor(data.feels_like)}℃`;
         forecast_div.style.display = "block";
-      });
+      })
+      .catch((err) => {
+        console.log(err)
+        console.log("no success");
+        err_div.classList.remove("hidden");
+        forecast_div.style.display = "none";
+    })
   }
 });

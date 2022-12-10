@@ -1,3 +1,4 @@
+from email import message
 from flask import Flask, request, jsonify
 import requests
 from flask_cors import CORS
@@ -5,6 +6,13 @@ import json
 
 app = Flask(__name__)
 CORS(app)
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify(
+        message = "Error occurred"
+        ), 500
 
 @app.route('/', methods=['GET'])
 def index():
@@ -18,14 +26,18 @@ def index():
     
     # return weatherInfo.json();
     #returning json to fetch
-    return jsonify(
+    try:
+        return jsonify(
+        status_code=200,
         name=coordinates[0]['name'],
         weather=weatherInfo.json()["weather"][0]["description"],
         temp=weatherInfoJSON['main']['temp'],
         feels_like = weatherInfoJSON['main']['feels_like'],
         humidity= weatherInfoJSON['main']['humidity'],
-    )
-
+        )
+    except IndexError:
+        print("Couldn't get weather")
+        
 
 app.run(host='0.0.0.0', port=8080)
 
