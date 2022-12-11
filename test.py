@@ -5,11 +5,15 @@ from flask_cors import CORS
 import json
 from flask_caching import Cache
 from datetime import datetime, timedelta
+import time
 
 now = datetime.now()
 
 current_time = now.strftime("%H:%M:%S")
 print("Current Time =", current_time)
+
+
+print(time.time())
 
 
 config = {
@@ -27,7 +31,7 @@ app.config.from_mapping(config)
 cache = Cache(app)
 
 # classes
-class setWeather:
+class WeatherData:
     def __init__(
         self,
         place,
@@ -37,7 +41,6 @@ class setWeather:
         temp,
         feels_like,
         humidity,
-        cachedTxt,
     ):
         self.city = place
         self.weatherForecast = forecast
@@ -46,12 +49,9 @@ class setWeather:
         self.humidityVal = humidity
         self.temperature = temp
         self.feels_likeVal = feels_like
-        self.cachedTxt = cachedTxt
-
-
-# functions
-def returnJson(data):
-    return jsonify(
+        
+    def create_weather_json(data):
+        return jsonify(
         name=data.city,
         weather=data.weatherForecast,
         temp=data.temperature,
@@ -60,8 +60,6 @@ def returnJson(data):
         time_refreshed=data.time_updated,
         next_refresh=data.next_time_updated,
     )
-
-
 
 
 @app.route("/", methods=["GET"])
@@ -74,7 +72,7 @@ def index():
         # checking if exists in cache
         if cache.get(source.lower()):
             data = cache.get(source.lower())
-            return returnJson(data)
+            return WeatherData.create_weather_json(data)
 
         # fetching weather using city name
         response = requests.get(
@@ -83,7 +81,7 @@ def index():
         res = response.json()
 
         # setting up data
-        weatherData = setWeather(
+        weatherData = WeatherData(
             res["name"],
             res["weather"][0]["description"],
             datetime.now().strftime("%H:%M"),
@@ -91,14 +89,13 @@ def index():
             res["main"]["temp"],
             res["main"]["feels_like"],
             res["main"]["humidity"],
-            "Not cached",
         )
 
         # saving in cache for 10mins
         cache.set(f"{weatherData.city.lower()}", weatherData, timeout=600)
 
         # returning json to fetch
-        return returnJson(weatherData)
+        return WeatherData.create_weather_json(weatherData)
 
     except Exception as err:
         print(err)
