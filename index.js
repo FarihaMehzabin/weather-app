@@ -6,6 +6,7 @@ const feels_like = document.getElementById("feels-like");
 const forecast_div = document.getElementById("forecast");
 const err_div = document.getElementById("error");
 const date_time = document.getElementById("date-time");
+const timeUpdated = document.getElementById("time_updated");
 const month_array = [
   "January",
   "February",
@@ -59,7 +60,9 @@ place.addEventListener("keydown", function (e) {
       .then((data) => {
         // console.log(data.status_code);
         // console.log("success");
+        // console.log(data)
         // console.log(data.error);
+        // console.log(data.message);
 
         //checking for error message returned by exception
         if (data.error) {
@@ -74,10 +77,11 @@ place.addEventListener("keydown", function (e) {
           humidity.textContent = `Humidity: ${data.humidity}%`;
           feels_like.textContent = `Feels like ${Math.floor(data.feels_like)}℃`;
           forecast_div.style.display = "block";
+          timeUpdated.innerHTML = `<p>This data was last refreshed at ${data.time_refreshed} and will next be updated at ${data.next_refresh}.</p>`;
         }
       })
       .catch((err) => {
-        // console.log(err);
+        console.log(err);
         // console.log("no success");
         err_div.classList.remove("hidden");
         forecast_div.style.display = "none";

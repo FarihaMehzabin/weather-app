@@ -133,6 +133,14 @@ input::placeholder {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
 }
+.time_updated{
+  width: fit-content;
+  color: rgb(20, 29, 23);
+  font-weight: bold;
+  background-color: rgba(255, 255, 255, 0.601);
+  margin-top: 1rem;
+  padding: .3rem;
+}
 
 
 .hidden{

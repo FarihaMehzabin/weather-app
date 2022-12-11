@@ -6,8 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>weather app</title>
     <link rel="stylesheet" href="index.css" />
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Arimo:wght@500&family=Barlow:wght@200&family=Fraunces:opsz,wght@9..144,500&display=swap" rel="stylesheet">
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"
+      integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm"
+      crossorigin="anonymous"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Arimo:wght@500&family=Barlow:wght@200&family=Fraunces:opsz,wght@9..144,500&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <main>
@@ -16,7 +26,11 @@
           <div class="header-icon"></div>
           <h2>Weather Forecast</h2>
           <p>Press Enter to get your forecast!</p>
-          <input type="text" placeholder="Where are you located?" id="place-name" />
+          <input
+            type="text"
+            placeholder="Where are you located?"
+            id="place-name"
+          />
         </div>
       </div>
       <div class="container">
@@ -30,9 +44,10 @@
             <h1 id="temp__txt">21deg</h1>
             <p id="feels-like">Feels like 26deg</p>
           </div>
-           <div class="humidity">
-            <p id="humidity__txt">Humidity 60% </p>
+          <div class="humidity">
+            <p id="humidity__txt">Humidity 60%</p>
           </div>
+          <div class="time_updated" id="time_updated"></div>
         </div>
         <div class="error hidden" id="error">
           <h2>Woops, something went wrong, please try again.</h2>
