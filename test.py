@@ -7,14 +7,6 @@ from flask_caching import Cache
 from datetime import datetime, timedelta
 import time
 
-now = datetime.now()
-
-current_time = now.strftime("%H:%M:%S")
-print("Current Time =", current_time)
-
-
-print(time.time())
-
 
 config = {
     "DEBUG": True,  # some Flask specific configs
@@ -26,11 +18,16 @@ config = {
 app = Flask(__name__)
 CORS(app)
 
+# print(time.time()+(60*10))
+# print(time.time())
+
+
 # Flask-Caching setup
 app.config.from_mapping(config)
 cache = Cache(app)
 
 # classes
+''' Creating an object with the fetched data'''
 class WeatherData:
     def __init__(
         self,
@@ -70,9 +67,9 @@ def index():
         )  # getting parameters from url. Whatever comes after ? is a parameter
 
         # checking if exists in cache
-        if cache.get(source.lower()):
-            data = cache.get(source.lower())
-            return WeatherData.create_weather_json(data)
+        cacheCheck = cache.get(source.lower())
+        if cacheCheck is not None:
+            return WeatherData.create_weather_json(cacheCheck)
 
         # fetching weather using city name
         response = requests.get(
@@ -84,8 +81,8 @@ def index():
         weatherData = WeatherData(
             res["name"],
             res["weather"][0]["description"],
-            datetime.now().strftime("%H:%M"),
-            (datetime.now() + timedelta(minutes=10)).strftime("%H:%M"),
+            str(time.time()),
+            str(time.time()+(60*10)),
             res["main"]["temp"],
             res["main"]["feels_like"],
             res["main"]["humidity"],
@@ -120,3 +117,9 @@ app.run(host="0.0.0.0", port=8080)
 
 
 # print(f"date is {datetime.now().strftime('%H:%M:%S')} and {res['name']}")
+
+
+# now = datetime.now()
+
+# current_time = now.strftime("%H:%M:%S")
+# print("Current Time =", current_time)

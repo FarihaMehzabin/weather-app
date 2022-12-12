@@ -31,16 +31,23 @@ const day_array = [
   "Friday",
   "Saturday",
 ];
+
+// Getting date
 const date = new Date();
 const day = date.getDate();
 const month = month_array[date.getMonth()];
 const weekDay = day_array[date.getDay()];
 
+
 forecast_div.style.display = "none";
 
-console.log(day, month, weekDay);
 
-// console.log(place.value)
+function getTime(unixTimestamp){
+ let date = new Date(unixTimestamp * 1000);
+ return date.toLocaleTimeString("en-US");
+
+}
+
 
 place.addEventListener("keydown", function (e) {
   if (e.key === "Enter") {
@@ -58,12 +65,6 @@ place.addEventListener("keydown", function (e) {
         return res.json();
       })
       .then((data) => {
-        // console.log(data.status_code);
-        // console.log("success");
-        // console.log(data)
-        // console.log(data.error);
-        // console.log(data.message);
-
         //checking for error message returned by exception
         if (data.error) {
             forecast.textContent = "We're unable to fetch the weather at the moment, please try again."
@@ -71,18 +72,19 @@ place.addEventListener("keydown", function (e) {
             humidity.textContent = ``;
             feels_like.textContent = ``;
             forecast_div.style.display = "block";
+            timeUpdated.style.display = "none";
         } else {
           forecast.textContent = data.weather;
           temp.textContent = `${Math.floor(data.temp)}℃`;
           humidity.textContent = `Humidity: ${data.humidity}%`;
           feels_like.textContent = `Feels like ${Math.floor(data.feels_like)}℃`;
           forecast_div.style.display = "block";
-          timeUpdated.innerHTML = `<p>This data was last refreshed at ${data.time_refreshed} and will next be updated at ${data.next_refresh}.</p>`;
+          timeUpdated.style.display = "block";
+          timeUpdated.innerHTML = `<p>This data was last refreshed at ${getTime(data.time_refreshed)} and will next be updated at ${getTime(data.next_refresh)}.</p>`;
         }
       })
       .catch((err) => {
-        console.log(err);
-        // console.log("no success");
+        // console.log(err);
         err_div.classList.remove("hidden");
         forecast_div.style.display = "none";
       });
