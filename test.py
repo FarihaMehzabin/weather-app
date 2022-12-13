@@ -56,11 +56,11 @@ class WeatherData:
         next_refresh=data.next_time_updated,
     )
         
-class ip_addr_data:
+class IpAddrData:
     ip_list = []
     
     def check_for_ip(ip):
-        data = ip_addr_data.ip_list
+        data = IpAddrData.ip_list
         for i in range(len(data)):
             if(data[i]['addr']== ip and int(time.time()) - data[i]['time'] > 10):
                 return {
@@ -79,11 +79,11 @@ def index():
     try:
         ip_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
         
-        rate_limit = ip_addr_data.check_for_ip(str(ip_addr))
+        rate_limit = IpAddrData.check_for_ip(str(ip_addr))
         
         # print(ip_addr_list, rate_limit)
         
-        ip_addr_list = ip_addr_data.ip_list
+        ip_addr_list = IpAddrData.ip_list
         
         if rate_limit is None:
             ip_addr_list.append({'addr': f"{ip_addr}", 'time': int(time.time())})
