@@ -74,6 +74,12 @@ class ip_addr_data:
 
 # ip_addr_list = []
 
+<<<<<<< HEAD
+=======
+
+            
+
+>>>>>>> 2cd60c2a2a7255ecfac1aef1006d406f1cfbbad1
 
 @app.route("/", methods=["GET"])
 def index():
