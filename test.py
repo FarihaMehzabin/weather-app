@@ -72,6 +72,24 @@ class IpAddrData:
                     'delete': False,
                 }
 
+class CacheByMe:
+    data = dict()
+    
+    def check_in_cache(city):
+        # check if city exists
+        if city.lower() not in CacheByMe.data.keys(): return False
+        
+        time_passed = time.time() - CacheByMe.data[city]['time_set']
+        if time_passed>=600:
+            return False
+                
+        else:
+            return CacheByMe.data[city]['value']
+        
+    def add_weather_data(city, weather_data):
+        CacheByMe.data[city.lower()] = {'value': weather_data, 'time_set': time.time()}
+
+
 # ip_addr_list = []
 
 @app.route("/", methods=["GET"])
@@ -80,8 +98,6 @@ def index():
         ip_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
         
         rate_limit = IpAddrData.check_for_ip(str(ip_addr))
-        
-        # print(ip_addr_list, rate_limit)
         
         ip_addr_list = IpAddrData.ip_list
         
@@ -100,9 +116,14 @@ def index():
         )  # getting parameters from url. Whatever comes after ? is a parameter
 
         # checking if exists in cache
-        cache_check = cache.get(source.lower())
-        if cache_check is not None:
+        cache_check = CacheByMe.check_in_cache(source.lower())
+        
+        if cache_check:
             return WeatherData.create_weather_json(cache_check)
+        
+        # cache_check = cache.get(source.lower())
+        # if cache_check is not None:
+        #     return WeatherData.create_weather_json(cache_check)
 
         # fetching weather using city name
         response = requests.get(
@@ -111,7 +132,7 @@ def index():
         res = response.json()
 
         # setting up data
-        weatherData = WeatherData(
+        weather_data = WeatherData(
             res["name"],
             res["weather"][0]["description"],
             str(time.time()),
@@ -120,12 +141,14 @@ def index():
             res["main"]["feels_like"],
             res["main"]["humidity"],
         )
-
+    
         # saving in cache for 10mins
-        cache.set(f"{weatherData.city.lower()}", weatherData, timeout=600)
-
+        CacheByMe.add_weather_data(weather_data.city.lower(), weather_data)
+        # cache.set(f"{weatherData.city.lower()}", weatherData, timeout=600)
+        
+        print(CacheByMe.data)
         # returning json to fetch
-        return WeatherData.create_weather_json(weatherData)
+        return WeatherData.create_weather_json(weather_data)
 
     except Exception as err:
         print(err)
@@ -156,3 +179,20 @@ app.run(host="0.0.0.0", port=8080)
 
 # current_time = now.strftime("%H:%M:%S")
 # print("Current Time =", current_time)
+
+
+
+# class TimeoutVar:
+#     """Variable whose values time out."""
+
+#     def __init__(self, value, timeout):
+#         """Store the timeout and value."""
+#         self._value = value
+#         self._last_set = time.time()
+#         self.timeout = timeout
+
+#     @property
+#     def value(self):
+#         """Get the value if the value hasn't timed out."""
+#         if time.time() - self._last_set < self.timeout:
+#             return self._value
