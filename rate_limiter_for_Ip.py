@@ -1,4 +1,5 @@
 import time
+from flask import jsonify
 
 class IpAddrData:
     # ip_list = []
@@ -18,3 +19,16 @@ class IpAddrData:
                 return{
                     'delete': False,
                 }
+                
+    def rate_limiter(self, rate_limit, ip_addr):
+        ip_addr_list = self.ip_list
+            
+        if rate_limit is None:
+            ip_addr_list.append({'addr': f"{ip_addr}", 'time': int(time.time())})
+            
+        if rate_limit is not None and rate_limit["delete"]:
+            del ip_addr_list[rate_limit['index']]
+            ip_addr_list.append({'addr': f"{ip_addr}", 'time': int(time.time())})
+                
+        elif rate_limit is not None and rate_limit["delete"] == False:
+            return jsonify(rate_limit_response="rate limit reached. Please try again in 10 seconds.")

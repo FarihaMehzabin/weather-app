@@ -19,26 +19,7 @@ config = {
 app = Flask(__name__)
 CORS(app)
 
-
-def rate_limiter(rate_limit, ip_addr):
-    ip_addr_list = ip_instance.ip_list
-        
-    if rate_limit is None:
-        ip_addr_list.append({'addr': f"{ip_addr}", 'time': int(time.time())})
-        
-    if rate_limit is not None and rate_limit["delete"]:
-        del ip_addr_list[rate_limit['index']]
-        ip_addr_list.append({'addr': f"{ip_addr}", 'time': int(time.time())})
-            
-    elif rate_limit is not None and rate_limit["delete"] == False:
-        return jsonify(rate_limit_response="rate limit reached. Please try again in 10 seconds.")
-
-
-def check_in_cache(source):
-    cache_check = cache_instance.check_in_cache(source.lower())
-        
-    if cache_check:
-        return WeatherData.create_weather_json(cache_check)
+    
 
 # public class instances 
 ip_instance = IpAddrData()
@@ -49,15 +30,23 @@ cache_instance = CacheByMe()
 def index():
     try:
         ip_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
+        
         # setting up rate limit
-        rate_limiter(ip_instance.check_for_ip(ip_addr), ip_addr)
+        ip_instance.rate_limiter(ip_instance.check_for_ip(ip_addr), ip_addr)
         
         source = request.args.get(
             "city"
         )  # getting parameters from url. Whatever comes after ? is a parameter
         
         # checking if exists in cache
-        check_in_cache(source.lower())
+        cache_check = cache_instance.check_in_cache(source.lower())
+        
+        
+        if cache_check == False:
+            del cache_instance.data[source.lower()]
+        elif cache_check != 'Not found':
+            return WeatherData.create_weather_json(cache_check)
+        
         
         # fetching weather using city name
         response = requests.get(

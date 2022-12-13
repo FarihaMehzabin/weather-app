@@ -19,14 +19,14 @@ class WeatherData:
         self.temperature = temp
         self.feels_likeVal = feels_like
         
-    def create_weather_json(data):
+    def create_weather_json(self):
         return jsonify(
-        name=data.city,
-        weather=data.weatherForecast,
-        temp=data.temperature,
-        feels_like=data.feels_likeVal,
-        humidity=data.humidityVal,
-        time_refreshed=data.time_updated,
-        next_refresh=data.next_time_updated,
+        name=self.city,
+        weather=self.weatherForecast,
+        temp=self.temperature,
+        feels_like=self.feels_likeVal,
+        humidity=self.humidityVal,
+        time_refreshed=self.time_updated,
+        next_refresh=self.next_time_updated,
     )
         
