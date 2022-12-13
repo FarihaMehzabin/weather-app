@@ -1,11 +1,12 @@
 from email import message
 from flask import Flask, request, jsonify
-import requests
 from flask_cors import CORS
 import json
-from flask_caching import Cache
-from datetime import datetime, timedelta
 import time
+import requests
+from cache import CacheByMe
+from weather_data import WeatherData
+from rate_limiter_for_Ip import IpAddrData
 
 
 config = {
@@ -19,112 +20,45 @@ app = Flask(__name__)
 CORS(app)
 
 
-# Flask-Caching setup
-app.config.from_mapping(config)
-cache = Cache(app)
-
-
-# classes
-''' Creating an object with the fetched data'''
-class WeatherData:
-    def __init__(
-        self,
-        place,
-        forecast,
-        time_updated,
-        next_time_updated,
-        temp,
-        feels_like,
-        humidity,
-    ):
-        self.city = place
-        self.weatherForecast = forecast
-        self.time_updated = time_updated
-        self.next_time_updated = next_time_updated
-        self.humidityVal = humidity
-        self.temperature = temp
-        self.feels_likeVal = feels_like
+def rate_limiter(rate_limit, ip_addr):
+    ip_addr_list = ip_instance.ip_list
         
-    def create_weather_json(data):
-        return jsonify(
-        name=data.city,
-        weather=data.weatherForecast,
-        temp=data.temperature,
-        feels_like=data.feels_likeVal,
-        humidity=data.humidityVal,
-        time_refreshed=data.time_updated,
-        next_refresh=data.next_time_updated,
-    )
+    if rate_limit is None:
+        ip_addr_list.append({'addr': f"{ip_addr}", 'time': int(time.time())})
         
-class IpAddrData:
-    ip_list = []
-    
-    def check_for_ip(ip):
-        data = IpAddrData.ip_list
-        for i in range(len(data)):
-            if(data[i]['addr']== ip and int(time.time()) - data[i]['time'] > 10):
-                return {
-                    'index': i, 
-                    'delete': True,
-                }
-            elif(data[i]['addr']== ip and int(time.time()) - data[i]['time'] <= 10):
-                return{
-                    'delete': False,
-                }
-
-class CacheByMe:
-    data = dict()
-    
-    def check_in_cache(city):
-        # check if city exists
-        if city.lower() not in CacheByMe.data.keys(): return False
-        
-        time_passed = time.time() - CacheByMe.data[city]['time_set']
-        if time_passed>=600:
-            return False
-                
-        else:
-            return CacheByMe.data[city]['value']
-        
-    def add_weather_data(city, weather_data):
-        CacheByMe.data[city.lower()] = {'value': weather_data, 'time_set': time.time()}
+    if rate_limit is not None and rate_limit["delete"]:
+        del ip_addr_list[rate_limit['index']]
+        ip_addr_list.append({'addr': f"{ip_addr}", 'time': int(time.time())})
+            
+    elif rate_limit is not None and rate_limit["delete"] == False:
+        return jsonify(rate_limit_response="rate limit reached. Please try again in 10 seconds.")
 
 
-# ip_addr_list = []
+def check_in_cache(source):
+    cache_check = cache_instance.check_in_cache(source.lower())
+        
+    if cache_check:
+        return WeatherData.create_weather_json(cache_check)
+
+# public class instances 
+ip_instance = IpAddrData()
+cache_instance = CacheByMe()
+
 
 @app.route("/", methods=["GET"])
 def index():
     try:
         ip_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
+        # setting up rate limit
+        rate_limiter(ip_instance.check_for_ip(ip_addr), ip_addr)
         
-        rate_limit = IpAddrData.check_for_ip(str(ip_addr))
-        
-        ip_addr_list = IpAddrData.ip_list
-        
-        if rate_limit is None:
-            ip_addr_list.append({'addr': f"{ip_addr}", 'time': int(time.time())})
-        
-        if rate_limit is not None and rate_limit["delete"]:
-            del ip_addr_list[rate_limit['index']]
-            ip_addr_list.append({'addr': f"{ip_addr}", 'time': int(time.time())})
-            
-        elif rate_limit is not None and rate_limit["delete"] == False:
-            return jsonify(rate_limit_response="rate limit reached. Please try again in 10 seconds.")
-            
         source = request.args.get(
             "city"
         )  # getting parameters from url. Whatever comes after ? is a parameter
-
+        
         # checking if exists in cache
-        cache_check = CacheByMe.check_in_cache(source.lower())
+        check_in_cache(source.lower())
         
-        if cache_check:
-            return WeatherData.create_weather_json(cache_check)
-        
-        # cache_check = cache.get(source.lower())
-        # if cache_check is not None:
-        #     return WeatherData.create_weather_json(cache_check)
-
         # fetching weather using city name
         response = requests.get(
             f"http://api.openweathermap.org/data/2.5/weather?q={source}&units=metric&appid=106c8085ba2b900cce93846e18cedece"
@@ -143,10 +77,9 @@ def index():
         )
     
         # saving in cache for 10mins
-        CacheByMe.add_weather_data(weather_data.city.lower(), weather_data)
-        # cache.set(f"{weatherData.city.lower()}", weatherData, timeout=600)
+        cache_instance.add_weather_data(weather_data.city.lower(), weather_data)
         
-        print(CacheByMe.data)
+        print(cache_instance.data)
         # returning json to fetch
         return WeatherData.create_weather_json(weather_data)
 
