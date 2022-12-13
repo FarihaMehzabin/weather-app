@@ -11,24 +11,21 @@ class IpAddrData:
         data = self.ip_list
         for i in range(len(data)):
             if(data[i]['addr']== ip and int(time.time()) - data[i]['time'] > 10):
-                return {
-                    'index': i, 
-                    'delete': True,
-                }
+                return i, True, 'Found'
             elif(data[i]['addr']== ip and int(time.time()) - data[i]['time'] <= 10):
-                return{
-                    'delete': False,
-                }
+                return i, False, 'Found'
+        
+        return 0, True, "not found"
                 
-    def rate_limiter(self, rate_limit, ip_addr):
+    def apply_rate_limiter(self, index, delete, found, ip_addr):
         ip_addr_list = self.ip_list
             
-        if rate_limit is None:
+        if found == 'not found':
             ip_addr_list.append({'addr': f"{ip_addr}", 'time': int(time.time())})
             
-        if rate_limit is not None and rate_limit["delete"]:
-            del ip_addr_list[rate_limit['index']]
+        elif delete == True:
+            del ip_addr_list[index]
             ip_addr_list.append({'addr': f"{ip_addr}", 'time': int(time.time())})
                 
-        elif rate_limit is not None and rate_limit["delete"] == False:
+        elif delete == False:
             return jsonify(rate_limit_response="rate limit reached. Please try again in 10 seconds.")

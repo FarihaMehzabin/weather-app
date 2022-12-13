@@ -32,7 +32,9 @@ def index():
         ip_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
         
         # setting up rate limit
-        ip_instance.rate_limiter(ip_instance.check_for_ip(ip_addr), ip_addr)
+        index, delete, found = ip_instance.check_for_ip(ip_addr)
+        
+        ip_instance.apply_rate_limiter(index, delete, found, ip_addr)
         
         source = request.args.get(
             "city"
