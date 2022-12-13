@@ -6,8 +6,6 @@ import json
 from flask_caching import Cache
 from datetime import datetime, timedelta
 import time
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 
 
 config = {
@@ -25,9 +23,6 @@ CORS(app)
 app.config.from_mapping(config)
 cache = Cache(app)
 
-
-# setting up rate limiter
-limiter = Limiter(app, key_func=get_remote_address)
 
 # classes
 ''' Creating an object with the fetched data'''
@@ -64,24 +59,20 @@ class WeatherData:
 class ip_addr_data:
     ip_list = []
     
-    def add_ip(self, address, time):
-        self.ip_list.append({'addr': f"{address}", 'time': int(time.time())})
+    def check_for_ip(ip):
+        data = ip_addr_data.ip_list
+        for i in range(len(data)):
+            if(data[i]['addr']== ip and int(time.time()) - data[i]['time'] > 10):
+                return {
+                    'index': i, 
+                    'delete': True,
+                }
+            elif(data[i]['addr']== ip and int(time.time()) - data[i]['time'] <= 10):
+                return{
+                    'delete': False,
+                }
 
 # ip_addr_list = []
-
-def check_for_ip(ip):
-    data = ip_addr_data.ip_list
-    for i in range(len(data)):
-        if(data[i]['addr']== ip and int(time.time()) - data[i]['time'] > 10):
-            return {
-                'index': i, 
-                 'delete': True,
-            }
-        elif(data[i]['addr']== ip and int(time.time()) - data[i]['time'] <= 10):
-            return{
-                'delete': False,
-            }
-            
 
 
 @app.route("/", methods=["GET"])
@@ -89,7 +80,7 @@ def index():
     try:
         ip_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
         
-        rate_limit = check_for_ip(ip_addr)
+        rate_limit = ip_addr_data.check_for_ip(str(ip_addr))
         
         # print(ip_addr_list, rate_limit)
         
