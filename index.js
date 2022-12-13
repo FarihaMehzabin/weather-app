@@ -65,6 +65,9 @@ place.addEventListener("keydown", function (e) {
         return res.json();
       })
       .then((data) => {
+
+
+        console.log(data)
         //checking for error message returned by exception
         if (data.error) {
             forecast.textContent = "We're unable to fetch the weather at the moment, please try again."
@@ -73,7 +76,17 @@ place.addEventListener("keydown", function (e) {
             feels_like.textContent = ``;
             forecast_div.style.display = "block";
             timeUpdated.style.display = "none";
-        } else {
+        } 
+        else if(data.rate_limit_response){
+          forecast.textContent =
+            data.rate_limit_response,
+          temp.textContent = ``;
+          humidity.textContent = ``;
+          feels_like.textContent = ``;
+          forecast_div.style.display = "block";
+          timeUpdated.style.display = "none";
+        }
+        else {
           forecast.textContent = data.weather;
           temp.textContent = `${Math.floor(data.temp)}℃`;
           humidity.textContent = `Humidity: ${data.humidity}%`;
@@ -84,7 +97,7 @@ place.addEventListener("keydown", function (e) {
         }
       })
       .catch((err) => {
-        // console.log(err);
+        console.log(err);
         err_div.classList.remove("hidden");
         forecast_div.style.display = "none";
       });

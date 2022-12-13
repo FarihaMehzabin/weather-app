@@ -6,6 +6,8 @@ import json
 from flask_caching import Cache
 from datetime import datetime, timedelta
 import time
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 
 config = {
@@ -18,13 +20,14 @@ config = {
 app = Flask(__name__)
 CORS(app)
 
-# print(time.time()+(60*10))
-# print(time.time())
-
 
 # Flask-Caching setup
 app.config.from_mapping(config)
 cache = Cache(app)
+
+
+# setting up rate limiter
+limiter = Limiter(app, key_func=get_remote_address)
 
 # classes
 ''' Creating an object with the fetched data'''
@@ -57,19 +60,59 @@ class WeatherData:
         time_refreshed=data.time_updated,
         next_refresh=data.next_time_updated,
     )
+        
+class ip_addr_data:
+    ip_list = []
+    
+    def add_ip(self, address, time):
+        self.ip_list.append({'addr': f"{address}", 'time': int(time.time())})
+
+# ip_addr_list = []
+
+def check_for_ip(ip):
+    data = ip_addr_data.ip_list
+    for i in range(len(data)):
+        if(data[i]['addr']== ip and int(time.time()) - data[i]['time'] > 10):
+            return {
+                'index': i, 
+                 'delete': True,
+            }
+        elif(data[i]['addr']== ip and int(time.time()) - data[i]['time'] <= 10):
+            return{
+                'delete': False,
+            }
+            
 
 
 @app.route("/", methods=["GET"])
 def index():
     try:
+        ip_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
+        
+        rate_limit = check_for_ip(ip_addr)
+        
+        # print(ip_addr_list, rate_limit)
+        
+        ip_addr_list = ip_addr_data.ip_list
+        
+        if rate_limit is None:
+            ip_addr_list.append({'addr': f"{ip_addr}", 'time': int(time.time())})
+        
+        if rate_limit is not None and rate_limit["delete"]:
+            del ip_addr_list[rate_limit['index']]
+            ip_addr_list.append({'addr': f"{ip_addr}", 'time': int(time.time())})
+            
+        elif rate_limit is not None and rate_limit["delete"] == False:
+            return jsonify(rate_limit_response="rate limit reached. Please try again in 10 seconds.")
+            
         source = request.args.get(
             "city"
         )  # getting parameters from url. Whatever comes after ? is a parameter
 
         # checking if exists in cache
-        cacheCheck = cache.get(source.lower())
-        if cacheCheck is not None:
-            return WeatherData.create_weather_json(cacheCheck)
+        cache_check = cache.get(source.lower())
+        if cache_check is not None:
+            return WeatherData.create_weather_json(cache_check)
 
         # fetching weather using city name
         response = requests.get(
