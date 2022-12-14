@@ -61,7 +61,7 @@ place.addEventListener("keydown", function (e) {
 
     fetch(`http://127.0.0.1:8080?city=${place.value}`)
       .then((res) => {
-        // console.log(res)
+        console.log(res.headers)
         return res.json();
       })
       .then((data) => {

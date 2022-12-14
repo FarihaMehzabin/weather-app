@@ -1,6 +1,4 @@
-from email import message
 from flask import Flask, request, jsonify
-from flask_cors import CORS
 import json
 import time
 import requests
@@ -17,7 +15,7 @@ config = {
 
 
 app = Flask(__name__)
-CORS(app)
+# CORS(app)
 
     
 
@@ -33,7 +31,9 @@ def index():
         
         
         if(limiter.check_if_limited(ip_addr)):
-            return jsonify(rate_limit_response="rate limit reached. Please try again in 10 seconds.")
+            limiter_data = jsonify(rate_limit_response="rate limit reached. Please try again in 10 seconds.")
+            limiter_data.headers.add('Access-Control-Allow-Origin', '*')
+            return limiter_data
         
         
         source = request.args.get(
@@ -43,14 +43,18 @@ def index():
         # checking if exists in cache
         cache_check = cache_instance.check_in_cache(source.lower())
         if cache_check:
-            return WeatherData.create_weather_json(cache_check)
+            cache_data = WeatherData.create_weather_json(cache_check)
+            cache_data.headers.add('Access-Control-Allow-Origin', '*')
+            return cache_data
         
         # fetching weather using city name
         response = requests.get(
             f"http://api.openweathermap.org/data/2.5/weather?q={source}&units=metric&appid=106c8085ba2b900cce93846e18cedece"
         )
         res = response.json()
-
+        
+        
+        # print(res.headers())
         # setting up data
         weather_data = WeatherData(
             res["name"],
@@ -67,7 +71,9 @@ def index():
         
         print(cache_instance.data)
         # returning json to fetch
-        return WeatherData.create_weather_json(weather_data)
+        data = WeatherData.create_weather_json(weather_data)
+        data.headers.add('Access-Control-Allow-Origin', '*')
+        return data
 
     except Exception as err:
         print(err)
