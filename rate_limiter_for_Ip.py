@@ -7,25 +7,31 @@ class IpAddrData:
     def __init__(self):
         self.ip_list = []
     
-    def check_for_ip(self, ip):
+    def check_if_ip_exists(self, ip):
+        data = self.ip_list
+        for i in range(len(data)):
+            if (data[i]['addr']== ip):
+                return True
+                
+        return False
+    
+    def check_if_limited(self, ip):
         data = self.ip_list
         for i in range(len(data)):
             if(data[i]['addr']== ip and int(time.time()) - data[i]['time'] > 10):
-                return i, True, 'Found'
+                return i, False
             elif(data[i]['addr']== ip and int(time.time()) - data[i]['time'] <= 10):
-                return i, False, 'Found'
-        
-        return 0, True, "not found"
-                
-    def apply_rate_limiter(self, index, delete, found, ip_addr):
+                return -1, True
+    
+    def add_ip(self, ip):
         ip_addr_list = self.ip_list
-            
-        if found == 'not found':
-            ip_addr_list.append({'addr': f"{ip_addr}", 'time': int(time.time())})
-            
-        elif delete == True:
-            del ip_addr_list[index]
-            ip_addr_list.append({'addr': f"{ip_addr}", 'time': int(time.time())})
+        
+        ip_addr_list.append({'addr': f"{ip}", 'time': int(time.time())})
+
                 
-        elif delete == False:
-            return jsonify(rate_limit_response="rate limit reached. Please try again in 10 seconds.")
+    def apply_rate_limiter(self, index, ip_addr):
+        ip_addr_list = self.ip_list
+                        
+        del ip_addr_list[index]
+        ip_addr_list.append({'addr': f"{ip_addr}", 'time': int(time.time())})
+                

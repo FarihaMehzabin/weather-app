@@ -31,10 +31,19 @@ def index():
     try:
         ip_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
         
-        # setting up rate limit
-        index, delete, found = ip_instance.check_for_ip(ip_addr)
         
-        ip_instance.apply_rate_limiter(index, delete, found, ip_addr)
+        ip_exists = ip_instance.check_if_ip_exists(ip_addr)
+        
+        if(ip_exists):
+            index, is_ip_limited = ip_instance.check_if_limited(ip_addr)
+            if(is_ip_limited):
+                return jsonify(rate_limit_response="rate limit reached. Please try again in 10 seconds.")
+            else:
+                ip_instance.apply_rate_limiter(index, ip_addr)
+            
+        else:
+            ip_instance.add_ip(ip_addr)
+        
         
         source = request.args.get(
             "city"

@@ -19,3 +19,6 @@ class CacheByMe:
         
     def add_weather_data(self,city, weather_data):
         self.data[city.lower()] = {'value': weather_data, 'time_set': time.time()}
+        
+   
+            
