@@ -32,6 +32,10 @@ def index():
         ip_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
         
         
+        if(limiter.check_if_limited(ip_addr)):
+            return jsonify(rate_limit_response="rate limit reached. Please try again in 10 seconds.")
+
+        
         ip_exists = limiter.check_if_ip_exists(ip_addr)
         
         if(ip_exists):
