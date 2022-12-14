@@ -8,12 +8,13 @@ class CacheByMe:
     
     def check_in_cache(self, city):
         # check if city exists
-        if city.lower() not in self.data.keys(): return "Not found"
+        cache_data = self.data
+        if city.lower() not in self.data.keys(): return False
         
         time_passed = time.time() - self.data[city]['time_set']
         if time_passed>=600:
-            return False
-                
+            del cache_data[city.lower()]
+            return False   
         else:
             return self.data[city]['value']
         

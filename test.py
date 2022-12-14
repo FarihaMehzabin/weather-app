@@ -34,19 +34,6 @@ def index():
         
         if(limiter.check_if_limited(ip_addr)):
             return jsonify(rate_limit_response="rate limit reached. Please try again in 10 seconds.")
-
-        
-        ip_exists = limiter.check_if_ip_exists(ip_addr)
-        
-        if(ip_exists):
-            index, is_ip_limited = limiter.check_if_limited(ip_addr)
-            if(is_ip_limited):
-                return jsonify(rate_limit_response="rate limit reached. Please try again in 10 seconds.")
-            else:
-                limiter.apply_rate_limiter(index, ip_addr)
-            
-        else:
-            limiter.add_ip(ip_addr)
         
         
         source = request.args.get(
@@ -55,13 +42,8 @@ def index():
         
         # checking if exists in cache
         cache_check = cache_instance.check_in_cache(source.lower())
-        
-        
-        if cache_check == False:
-            del cache_instance.data[source.lower()]
-        elif cache_check != 'Not found':
+        if cache_check:
             return WeatherData.create_weather_json(cache_check)
-        
         
         # fetching weather using city name
         response = requests.get(
