@@ -1,7 +1,7 @@
 import time
 from flask import jsonify
 
-class IpAddrData:
+class Limiter:
     # ip_list = []
     
     def __init__(self):
