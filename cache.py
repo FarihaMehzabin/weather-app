@@ -1,5 +1,7 @@
 import time
 import requests
+import threading
+from datetime import datetime
 from weather_data import WeatherData
 from rate_limiter_for_Ip import Limiter
 
@@ -7,18 +9,29 @@ class CacheByMe:
     
     def __init__(self):
         self.data = dict()
+        self.lock = threading.Lock()
         
         
     def get_weather_data(self, city):
+        
+        # self.lock.acquire()
         cache_check = self.check_in_cache(city.lower())
+        
         if cache_check:
+            print(f"[{datetime.now().strftime('%H:%M:%S')}]: I'm from cache")
+            
             cache_data = WeatherData.create_weather_json(cache_check)
             cache_data.headers.add('Access-Control-Allow-Origin', '*')
             return cache_data
         
+        # self.lock.release()
         response = requests.get(
             f"http://api.openweathermap.org/data/2.5/weather?q={city.lower()}&units=metric&appid=106c8085ba2b900cce93846e18cedece"
         )
+        
+        
+        print(f"[{datetime.now().strftime('%H:%M:%S')}]: Looking for {city} weather.")
+        
         
         res = response.json()
         
@@ -36,6 +49,10 @@ class CacheByMe:
         
         data = WeatherData.create_weather_json(weather_data)
         data.headers.add('Access-Control-Allow-Origin', '*')
+        
+        time.sleep(10)
+        print(f"[{datetime.now().strftime('%H:%M:%S')}]: slept for 10s")
+        
         return data
     
     

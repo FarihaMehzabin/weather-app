@@ -30,10 +30,10 @@ def index():
     try:
         ip_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
         
-        if(limiter.check_if_limited(ip_addr)):
-            limiter_data = jsonify(rate_limit_response="rate limit reached. Please try again in 10 seconds.")
-            limiter_data.headers.add('Access-Control-Allow-Origin', '*')
-            return limiter_data
+        # if(limiter.check_if_limited(ip_addr)):
+        #     limiter_data = jsonify(rate_limit_response="rate limit reached. Please try again in 10 seconds.")
+        #     limiter_data.headers.add('Access-Control-Allow-Origin', '*')
+        #     return limiter_data
         
         
         source = request.args.get(
