@@ -4,13 +4,14 @@ import threading
 from datetime import datetime
 from weather_data import WeatherData
 from rate_limiter_for_Ip import Limiter
+from CityLock import CityLock
 
 class CacheByMe:
     
     def __init__(self):
         self.data = dict()
-        self.cities = dict()
         self.lock = threading.Condition()
+        self.city_lock = CityLock()
     
     def log(self, message):
         print(f"[{datetime.now().strftime('%H:%M:%S')}] | Thread ID: {threading.get_ident()} {message}")    
@@ -27,23 +28,20 @@ class CacheByMe:
             cache_data.headers.add('Access-Control-Allow-Origin', '*')
             return cache_data  
         else: 
-            self.log(f"🌞Locking begins in outside cache, trying to dump {city} in dict...")
-            self.lock.acquire()
+            self.log(f"🌞trying to dump {city} in lock dict...")
+
             self.log(f"nothing in cache for {city}")
-            if(city not in self.cities.keys()):
-                self.log(f'🎉added {city} to dict')
-                self.cities[city.lower()] = {'lock': threading.Lock()}
             
-            self.lock.release()
-            self.log(f"Unlocked from outside cache")  
+            lock_city_up = self.city_lock.get_city_lock(city)
+            
          
         self.log(f"Outside cache check ends for {city}")
         
         
-            
-        self.log(f"❌ Locking begins... for {city}")
         
-        self.lock.acquire()
+        lock_city_up['lock'].acquire()
+        
+        self.log(f"❌ Locking begins... for {city}. Locked status: {lock_city_up['lock'].locked()} ")
         
         cache_check = self.check_in_cache(city.lower())
         
@@ -54,7 +52,7 @@ class CacheByMe:
             
             cache_data = WeatherData.create_weather_json(cache_check)
             cache_data.headers.add('Access-Control-Allow-Origin', '*')
-            self.lock.release()
+            lock_city_up['lock'].release()
             self.log(f"🟢Unlocked from cache..for {city}")    
             return cache_data  
         else: 
@@ -63,14 +61,13 @@ class CacheByMe:
         self.log(f"Inside cache check ends for {city}")
         
         
-        if city.lower() in self.cities.keys(): 
-            self.log(f'locked and trying to fetch weather for {city}')
-            self.cities[city.lower()]['lock'].acquire()
-        self.log(f'🙌 Done fetching weather for {city} ')
+       
+        self.log(f'trying to fetch weather for {city}')
         response = requests.get(
                         f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid=106c8085ba2b900cce93846e18cedece"
                     )
-       
+        self.log(f'🙌 Done fetching weather for {city} ')
+
         
             
         self.log("Start sleep for 10s")
@@ -92,12 +89,9 @@ class CacheByMe:
         self.log(f"Adding to cache..for {city}")
         self.add_weather_data(weather_data.city.lower(), weather_data)
         
-        self.cities[city.lower()]['lock'].release()
-        self.log(f'Unlocking & Finished adding {city} weather to cache')
+        lock_city_up['lock'].release()
+        self.log(f'Unlocking & Finished adding {city} weather to cache. Locked status: {lock_city_up["lock"].locked()}')
         
-        
-        self.lock.release()
-        self.log(f"Unlocking...")
         
         data = WeatherData.create_weather_json(weather_data)
         data.headers.add('Access-Control-Allow-Origin', '*')
