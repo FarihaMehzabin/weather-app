@@ -32,13 +32,13 @@ class CacheByMe:
         if lock_city_up is not None:
 
             self.log(f"❌ Locking begins... for {city}. Locked status: {lock_city_up['lock'].locked()} ")
-        
-            while True:
+            lock_city_up['lock'].acquire()
+            # while True:
                 
-                cache_data = self.return_cache_data(city.lower())
-                if cache_data:
-                    lock_city_up['lock'].release()
-                    return cache_data
+            cache_data = self.return_cache_data(city.lower())
+            if cache_data:
+                lock_city_up['lock'].release()
+                return cache_data
                 
                 
         self.log(f'😭trying to fetch weather for {city}')
@@ -65,10 +65,13 @@ class CacheByMe:
                 res["main"]["humidity"],
             )
             
-        
+        # self.lock.acquire()
         self.log(f"Adding to cache..for {city}")
         
         self.add_weather_data(weather_data.city.lower(), weather_data)
+        
+        # self.lock.release()
+        lock_city_up['lock'].release()
         
         data = WeatherData.create_weather_json(weather_data)
         
