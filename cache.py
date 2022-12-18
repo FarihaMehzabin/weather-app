@@ -18,58 +18,37 @@ class CacheByMe:
         
     def get_weather_data(self, city):
         
-        cache_check = self.check_in_cache(city.lower())
+        cache_data = self.return_cache_data(city.lower())
+        if cache_data:
+            return cache_data
         
-        self.log(f"Outside cache check start for {city}")
-        
-        if cache_check:
-            self.log(f"Printed from cache for {city} ")
-            cache_data = WeatherData.create_weather_json(cache_check)
-            cache_data.headers.add('Access-Control-Allow-Origin', '*')
-            return cache_data  
-        else: 
-            self.log(f"🌞trying to dump {city} in lock dict...")
+        self.log(f"🌞trying to dump {city} in lock dict...")
 
-            self.log(f"nothing in cache for {city}")
-            
-            lock_city_up = self.city_lock.get_city_lock(city)
-            
-         
-        self.log(f"Outside cache check ends for {city}")
+        self.log(f"nothing in cache for {city}")
+                
+        lock_city_up = self.city_lock.get_city_lock(city)
         
         
+        if lock_city_up is not None:
+
+            self.log(f"❌ Locking begins... for {city}. Locked status: {lock_city_up['lock'].locked()} ")
         
-        lock_city_up['lock'].acquire()
+            while True:
+                
+                cache_data = self.return_cache_data(city.lower())
+                if cache_data:
+                    lock_city_up['lock'].release()
+                    return cache_data
+                
+                
+        self.log(f'😭trying to fetch weather for {city}')
         
-        self.log(f"❌ Locking begins... for {city}. Locked status: {lock_city_up['lock'].locked()} ")
-        
-        cache_check = self.check_in_cache(city.lower())
-        
-        self.log(f"Inside cache check start for {city}")
-        
-        if cache_check:
-            self.log(f"Printed from cache for {city}")
-            
-            cache_data = WeatherData.create_weather_json(cache_check)
-            cache_data.headers.add('Access-Control-Allow-Origin', '*')
-            lock_city_up['lock'].release()
-            self.log(f"🟢Unlocked from cache..for {city}")    
-            return cache_data  
-        else: 
-            self.log(f"nothing in inside cache for {city}")
-        
-        self.log(f"Inside cache check ends for {city}")
-        
-        
-       
-        self.log(f'trying to fetch weather for {city}')
         response = requests.get(
                         f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid=106c8085ba2b900cce93846e18cedece"
                     )
+        
         self.log(f'🙌 Done fetching weather for {city} ')
 
-        
-            
         self.log("Start sleep for 10s")
         time.sleep(10)
         self.log("End sleep for 10s")
@@ -86,20 +65,19 @@ class CacheByMe:
                 res["main"]["humidity"],
             )
             
+        
         self.log(f"Adding to cache..for {city}")
+        
         self.add_weather_data(weather_data.city.lower(), weather_data)
         
-        lock_city_up['lock'].release()
-        self.log(f'Unlocking & Finished adding {city} weather to cache. Locked status: {lock_city_up["lock"].locked()}')
-        
-        
         data = WeatherData.create_weather_json(weather_data)
+        
         data.headers.add('Access-Control-Allow-Origin', '*')
            
         return data        
     
     
-    def check_in_cache(self, city):
+    def check_cache_expiry(self, city):
         # check if city exists
         cache_data = self.data
         if city.lower() not in self.data.keys(): return False
@@ -112,11 +90,21 @@ class CacheByMe:
         else:
             return self.data[city]['value']
         
+    
     def add_weather_data(self,city, weather_data):
         self.data[city.lower()] = {'value': weather_data, 'time_set': time.time()}
         
     
-    
+    def return_cache_data(self, city):
+        cache_check = self.check_cache_expiry(city.lower())
+        
+        if cache_check:
+            self.log(f"🖨️ Printed from cache for {city} ")
+            cache_data = WeatherData.create_weather_json(cache_check)
+            cache_data.headers.add('Access-Control-Allow-Origin', '*')
+            return cache_data  
+        else :
+            return False
         
    
             
