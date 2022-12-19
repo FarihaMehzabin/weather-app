@@ -40,9 +40,7 @@ class CityLock:
         else:
             # self.cities[city.lower()]['lock'].acquire()
             
-            
-            
-            self.log(f"Checked in lock_dict and found {city}")
+            self.log(f"🤔Checked in lock_dict and found {city}")
             
             return self.cities[city.lower()]
             
