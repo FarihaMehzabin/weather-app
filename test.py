@@ -1,3 +1,4 @@
+from functools import cache
 from flask import Flask, request, jsonify
 import json
 import time
@@ -6,6 +7,7 @@ import threading
 from cache import CacheByMe
 from weather_data import WeatherData
 from rate_limiter_for_Ip import Limiter
+from ModifyDict import ModifyDict
 
 
 config = {
@@ -23,6 +25,7 @@ app = Flask(__name__)
 # public class instances 
 limiter = Limiter()
 cache_instance = CacheByMe()
+lock = threading.Lock()
 
 
 @app.route("/", methods=["GET"])
@@ -30,15 +33,14 @@ def index():
     try:
         ip_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
         
-        # if(limiter.check_if_limited(ip_addr)):
-        #     limiter_data = jsonify(rate_limit_response="rate limit reached. Please try again in 10 seconds.")
-        #     limiter_data.headers.add('Access-Control-Allow-Origin', '*')
-        #     return limiter_data
-        
-        
         source = request.args.get(
             "city"
         )  
+        
+        if(limiter.check_if_limited(ip_addr)):
+            
+            return cache_instance.get_weather_data(source.lower(), True)
+            
         
         return cache_instance.get_weather_data(source.lower())
     

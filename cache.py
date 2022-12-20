@@ -21,7 +21,7 @@ class CacheByMe:
             f"[{datetime.now().strftime('%H:%M:%S')}] | Thread ID: {threading.get_ident()} {message}"
         )
 
-    def get_weather_data(self, city):
+    def get_weather_data(self, city, ip_limit=False):
 
         cache_data = self.return_cache_data(city.lower())
 
@@ -46,18 +46,29 @@ class CacheByMe:
             self.log(
                 f"❌ Locking begins... for {city}. Locked status: {lock_city_up.locked()} "
             )
-            
+
         self.log(f"Second time checking in cache for {city}")
+        
         cache_data = self.return_cache_data(city.lower())
 
         if cache_data:
-                
+
             self.log(f"Second cache check successful for {city}")
 
             lock_city_up.release()
 
             return cache_data
 
+        
+        if ip_limit:
+            
+            self.log(f"ip is limited and data not available for {city}")
+
+            lock_city_up.release()
+
+            return Limiter.return_rate_limiter()
+
+        
         self.log(f"😭trying to fetch weather for {city}")
 
         response = requests.get(
@@ -71,10 +82,9 @@ class CacheByMe:
         time.sleep(10)
 
         self.log("End sleep for 10s")
-        
-        return self._return_weather_data(response,lock_city_up)
 
-    
+        return self._return_weather_data(response, lock_city_up)
+
     def return_cache_data(self, city):
         cache_check = self.modify_dict.check_cache_expiry(city.lower())
 
@@ -85,10 +95,9 @@ class CacheByMe:
             return cache_data
         else:
             return False
-        
-    
+
     def _return_weather_data(self, response, lock):
-        
+
         res = response.json()
 
         weather_data = WeatherData(
@@ -104,7 +113,7 @@ class CacheByMe:
         self.log(f"Adding to cache..for {res['name']}")
 
         self.modify_dict.add_weather_data(weather_data.city.lower(), weather_data)
-        
+
         lock.release()
 
         weather_data = WeatherData.create_weather_json(weather_data)

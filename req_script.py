@@ -22,8 +22,8 @@ import concurrent.futures
 import time
 import requests
 
-# arr = ['london', 'london', 'New York', 'New York']
-arr = ['london', 'New York', 'london', 'New York']
+arr = ['london', 'london', 'New York', 'New York']
+# arr = ['london', 'New York', 'london', 'New York']
 # arr = ['london', 'New York', 'Berlin', 'Dubai']
 THREAD_POOL = 5
 
