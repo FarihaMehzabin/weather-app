@@ -8,6 +8,7 @@ from cache import CacheByMe
 from weather_data import WeatherData
 from rate_limiter_for_Ip import Limiter
 from ModifyDict import ModifyDict
+from db_functions import Db
 
 
 config = {
@@ -26,6 +27,7 @@ app = Flask(__name__)
 limiter = Limiter()
 cache_instance = CacheByMe()
 lock = threading.Lock()
+db = Db()
 
 
 @app.route("/", methods=["GET"])
@@ -37,6 +39,8 @@ def index():
             "city"
         )  
         
+        db.add_data('user_info',"(user_agent, ip_address) VALUES (%s, %s)",{request.headers.get('User-Agent')},{ip_addr})
+        
         if(limiter.check_if_limited(ip_addr)):
             
             return cache_instance.get_weather_data(source.lower(), True)
@@ -46,7 +50,7 @@ def index():
     
 
     except Exception as err:
-        print(err)
+        print(f"0{err}")
         return jsonify(error="Something went wrong :(")
 
 

@@ -6,7 +6,7 @@ from weather_data import WeatherData
 from rate_limiter_for_Ip import Limiter
 from CityLock import CityLock
 from ModifyDict import ModifyDict
-
+from db_functions import Db
 
 class CacheByMe:
     def __init__(self):
@@ -14,12 +14,15 @@ class CacheByMe:
         self.lock = threading.Condition()
         self.city_lock = CityLock()
         self.modify_dict = ModifyDict(self.data)
-
+        self.db = Db()
+    
     def log(self, message):
 
         print(
             f"[{datetime.now().strftime('%H:%M:%S')}] | Thread ID: {threading.get_ident()} {message}"
         )
+        
+        self.db.add_data('log_message', '(log) VALUES (%s)',f"[{datetime.now().strftime('%H:%M:%S')}] | Thread ID: {threading.get_ident()} {message}")
 
     def get_weather_data(self, city, ip_limit=False):
 
