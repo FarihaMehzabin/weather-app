@@ -10,23 +10,7 @@ class Limiter:
         self.ip_list = []
         self.lock = threading.Lock()
 
-    def _check_if_ip_exists(self, ip):
-        data = self.ip_list
-        
-        self.lock.acquire()
-        
-        for i in range(len(data)):
-            
-            if data[i]["addr"] == ip:
-                
-                self.lock.release()
-                
-                return True
-            
-        self.lock.release()
-        
-        return False
-
+    
     def check_if_limited(self, ip):
         data = self.ip_list
 
@@ -50,6 +34,24 @@ class Limiter:
             
         else:
             self._add_ip(ip)
+    
+    def _check_if_ip_exists(self, ip):
+        data = self.ip_list
+        
+        self.lock.acquire()
+        
+        for i in range(len(data)):
+            
+            if data[i]["addr"] == ip:
+                
+                self.lock.release()
+                
+                return True
+            
+        self.lock.release()
+        
+        return False
+
 
     def _add_ip(self, ip):
         ip_addr_list = self.ip_list

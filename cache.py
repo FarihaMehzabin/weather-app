@@ -15,14 +15,17 @@ class CacheByMe:
         self.city_lock = CityLock()
         self.modify_dict = ModifyDict(self.data)
         self.db = Db()
+        self.limiter = Limiter()
     
     def log(self, message):
+        
+        log_txt = f"[{datetime.now().strftime('%H:%M:%S')}] | Thread ID: {threading.get_ident()} {message}"
 
         print(
-            f"[{datetime.now().strftime('%H:%M:%S')}] | Thread ID: {threading.get_ident()} {message}"
+            log_txt
         )
         
-        self.db.add_data('log_message', '(log) VALUES (%s)',f"[{datetime.now().strftime('%H:%M:%S')}] | Thread ID: {threading.get_ident()} {message}")
+        self.db.add_log((log_txt,))
 
     def get_weather_data(self, city, ip_limit=False):
 
@@ -69,7 +72,7 @@ class CacheByMe:
 
             lock_city_up.release()
 
-            return Limiter.return_rate_limiter()
+            return self.limiter.return_rate_limiter()
 
         
         self.log(f"😭trying to fetch weather for {city}")

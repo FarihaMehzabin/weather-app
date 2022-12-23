@@ -36,8 +36,8 @@ class Db:
     cursor.close()
     db_config.close()
     
-    
-  def add_data(self, table_name, sql,  *values):
+  
+  def add_user_data(self, values):
     db_config = mysql.connector.connect(
   host="localhost",
   user="root",
@@ -46,15 +46,8 @@ class Db:
 )
     cursor = db_config.cursor()
     
-    sql = f"INSERT INTO {table_name} {sql}"
-    val = tuple()  
-    
-    if len(values)>1:
-      for x in values:
-        # print(', '.join(x))
-        val = val + (', '.join(x),)
-    else:
-      val = values
+    sql = f"INSERT INTO user_info (user_agent, ip_address) VALUES (%s, %s)"
+    val = values
     
     cursor.execute(sql, val)
 
@@ -62,5 +55,25 @@ class Db:
 
     cursor.close()
     db_config.close()
+  
+  def add_log(self, values):
+    db_config = mysql.connector.connect(
+  host="localhost",
+  user="root",
+  password="password",
+  database='weather_app'
+)
+    cursor = db_config.cursor()
+    
+    sql = f"INSERT INTO log_message (log) VALUES (%s)"
+    val = values
+    
+    cursor.execute(sql, val)
+
+    db_config.commit()
+
+    cursor.close()
+    db_config.close()
+    
     
   

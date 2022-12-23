@@ -39,7 +39,7 @@ def index():
             "city"
         )  
         
-        db.add_data('user_info',"(user_agent, ip_address) VALUES (%s, %s)",{request.headers.get('User-Agent')},{ip_addr})
+        db.add_user_data((request.headers.get('User-Agent'),ip_addr))
         
         if(limiter.check_if_limited(ip_addr)):
             
@@ -50,7 +50,7 @@ def index():
     
 
     except Exception as err:
-        print(f"0{err}")
+        print(f"{err}")
         return jsonify(error="Something went wrong :(")
 
 
