@@ -37,7 +37,7 @@ class Db:
     db_config.close()
     
   
-  def add_user_data(self, values):
+  def add_user_data(self, *values):
     db_config = mysql.connector.connect(
   host="localhost",
   user="root",
@@ -56,7 +56,7 @@ class Db:
     cursor.close()
     db_config.close()
   
-  def add_log(self, values):
+  def add_log(self, *values):
     db_config = mysql.connector.connect(
   host="localhost",
   user="root",

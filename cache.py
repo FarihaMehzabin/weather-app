@@ -8,6 +8,7 @@ from CityLock import CityLock
 from ModifyDict import ModifyDict
 from db_functions import Db
 
+
 class CacheByMe:
     def __init__(self):
         self.data = dict()
@@ -16,16 +17,14 @@ class CacheByMe:
         self.modify_dict = ModifyDict(self.data)
         self.db = Db()
         self.limiter = Limiter()
-    
+
     def log(self, message):
-        
+
         log_txt = f"[{datetime.now().strftime('%H:%M:%S')}] | Thread ID: {threading.get_ident()} {message}"
 
-        print(
-            log_txt
-        )
-        
-        self.db.add_log((log_txt,))
+        print(log_txt)
+
+        self.db.add_log(log_txt)
 
     def get_weather_data(self, city, ip_limit=False):
 
@@ -54,7 +53,7 @@ class CacheByMe:
             )
 
         self.log(f"Second time checking in cache for {city}")
-        
+
         cache_data = self.return_cache_data(city.lower())
 
         if cache_data:
@@ -65,16 +64,14 @@ class CacheByMe:
 
             return cache_data
 
-        
         if ip_limit:
-            
+
             self.log(f"ip is limited and data not available for {city}")
 
             lock_city_up.release()
 
             return self.limiter.return_rate_limiter()
 
-        
         self.log(f"😭trying to fetch weather for {city}")
 
         response = requests.get(

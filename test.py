@@ -1,5 +1,5 @@
 from functools import cache
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import json
 import time
 import requests
@@ -9,6 +9,7 @@ from weather_data import WeatherData
 from rate_limiter_for_Ip import Limiter
 from ModifyDict import ModifyDict
 from db_functions import Db
+from views import Views
 
 
 config = {
@@ -28,6 +29,7 @@ limiter = Limiter()
 cache_instance = CacheByMe()
 lock = threading.Lock()
 db = Db()
+view = Views()
 
 
 @app.route("/", methods=["GET"])
@@ -39,7 +41,7 @@ def index():
             "city"
         )  
         
-        db.add_user_data((request.headers.get('User-Agent'),ip_addr))
+        db.add_user_data(request.headers.get('User-Agent'),ip_addr)
         
         if(limiter.check_if_limited(ip_addr)):
             
@@ -52,6 +54,16 @@ def index():
     except Exception as err:
         print(f"{err}")
         return jsonify(error="Something went wrong :(")
+
+
+@app.route("/logs/ua")
+def user_list():
+    return view.return_user_agent_list()
+
+
+@app.route("/logs/log")
+def log_list():
+    return view.return_log_list()
 
 
 app.run(host="0.0.0.0", port=8080)
