@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify, render_template
 import json
 import time
 import requests
+import traceback
 import threading
 from cache import CacheByMe
 from weather_data import WeatherData
@@ -47,11 +48,13 @@ def index():
             
             return cache_instance.get_weather_data(source.lower(), True)
             
-        
-        return cache_instance.get_weather_data(source.lower())
+        else:
+            
+            return cache_instance.get_weather_data(source.lower())
     
 
     except Exception as err:
+        print(traceback.format_exc())
         print(f"{err}")
         return jsonify(error="Something went wrong :(")
 
@@ -66,7 +69,7 @@ def log_list():
     return view.return_log_list()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080,ssl_context=('cert.pem', 'key.pem'))
+    app.run(host="0.0.0.0", port=8080, ssl_context=('cert.pem', 'key.pem'))
 # app.run()
 
 

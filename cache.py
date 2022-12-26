@@ -64,6 +64,8 @@ class CacheByMe:
 
             return cache_data
 
+        self.log(f"{ip_limit}")
+        
         if ip_limit:
 
             self.log(f"ip is limited and data not available for {city}")

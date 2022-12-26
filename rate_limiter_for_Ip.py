@@ -1,3 +1,4 @@
+from datetime import datetime
 import time
 from flask import jsonify
 import threading
@@ -9,22 +10,30 @@ class Limiter:
     def __init__(self):
         self.ip_list = []
         self.lock = threading.Lock()
+        
+    def log(self, message):
 
+        log_txt = f"[{datetime.now().strftime('%H:%M:%S')}] | Thread ID: {threading.get_ident()} {message}"
+
+        print(log_txt)
+    
     
     def check_if_limited(self, ip):
         data = self.ip_list
+        
+        index = self._check_if_ip_exists(ip)
 
-        if self._check_if_ip_exists(ip):
+        if index:
             
             self.lock.acquire()
             
-            for i in range(len(data)):
+            if int(time.time()) - data[index]["time"] > 10:
                 
-                if data[i]["addr"] == ip and int(time.time()) - data[i]["time"] > 10:
+                    self._apply_rate_limiter(index, ip)
                     
-                    self._apply_rate_limiter(i, ip)
+                    self.lock.release()
                     
-                elif data[i]["addr"] == ip and int(time.time()) - data[i]["time"] <= 10:
+            elif int(time.time()) - data[index]["time"] <= 10:
                     
                     self.lock.release()
                     
@@ -33,9 +42,11 @@ class Limiter:
             self.lock.release()
             
         else:
+            
             self._add_ip(ip)
     
     def _check_if_ip_exists(self, ip):
+        
         data = self.ip_list
         
         self.lock.acquire()
@@ -46,7 +57,7 @@ class Limiter:
                 
                 self.lock.release()
                 
-                return True
+                return i
             
         self.lock.release()
         
