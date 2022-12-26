@@ -65,8 +65,9 @@ def user_list():
 def log_list():
     return view.return_log_list()
 
-
-app.run(host="0.0.0.0", port=8080)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080,ssl_context=('cert.pem', 'key.pem'))
+# app.run()
 
 
 # @app.errorhandler(500)
