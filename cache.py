@@ -7,7 +7,7 @@ from rate_limiter_for_Ip import Limiter
 from CityLock import CityLock
 from ModifyDict import ModifyDict
 from db_functions import Db
-
+from aes_encryption import Encrypt
 
 class CacheByMe:
     def __init__(self):
@@ -17,6 +17,7 @@ class CacheByMe:
         self.modify_dict = ModifyDict(self.data)
         self.db = Db()
         self.limiter = Limiter()
+        self.encrypt = Encrypt()
 
     def log(self, message):
 
@@ -75,9 +76,13 @@ class CacheByMe:
             return self.limiter.return_rate_limiter()
 
         self.log(f"😭trying to fetch weather for {city}")
+        
+        api_key = self.encrypt.get_api_key()
+        
+        self.log(f"💀 API key is {api_key}")
 
         response = requests.get(
-            f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid=106c8085ba2b900cce93846e18cedece"
+            f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid={api_key}"
         )
 
         self.log(f"🙌 Done fetching weather for {city} ")

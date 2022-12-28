@@ -11,6 +11,7 @@ from rate_limiter_for_Ip import Limiter
 from ModifyDict import ModifyDict
 from db_functions import Db
 from views import Views
+from aes_encryption import Encrypt
 
 
 config = {
@@ -21,9 +22,7 @@ config = {
 
 
 app = Flask(__name__)
-# CORS(app)
 
-    
 
 # public class instances 
 limiter = Limiter()
@@ -31,6 +30,7 @@ cache_instance = CacheByMe()
 lock = threading.Lock()
 db = Db()
 view = Views()
+encrpt = Encrypt()
 
 
 @app.route("/", methods=["GET"])

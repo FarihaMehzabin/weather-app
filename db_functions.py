@@ -23,7 +23,7 @@ class Db:
     db.close()
   
   
-  def create_table(self, table_name, columns):
+  def create_table(self, table_name, columns , primary_key = False):
     db_config = mysql.connector.connect(
     host="localhost",
     user="root",
@@ -31,7 +31,15 @@ class Db:
     database='weather_app'
   )
     cursor = db_config.cursor()
-    cursor.execute(f"CREATE TABLE {table_name} (ID INT AUTO_INCREMENT PRIMARY KEY,{columns})")
+    
+    if primary_key:
+      # print(f"CREATE TABLE {table_name} ({primary_key} PRIMARY KEY,{columns})")
+      # print(f"CREATE TABLE {table_name} (ID INT AUTO_INCREMENT PRIMARY KEY,{columns})")
+      cursor.execute(f"CREATE TABLE {table_name} ({primary_key} PRIMARY KEY,{columns})")
+    else:
+      # print(f"CREATE TABLE {table_name} (ID INT AUTO_INCREMENT PRIMARY KEY,{columns})")
+      cursor.execute(f"CREATE TABLE {table_name} (ID INT AUTO_INCREMENT PRIMARY KEY,{columns})")
+
 
     cursor.close()
     db_config.close()
@@ -76,4 +84,21 @@ class Db:
     db_config.close()
     
     
-  
+  def add_to_config(self,*values):
+    db_config = mysql.connector.connect(
+  host="localhost",
+  user="root",
+  password="password",
+  database='weather_app'
+)
+    cursor = db_config.cursor()
+    
+    sql = f"INSERT INTO config (key_name, value) VALUES (%s, %s)"
+    val = values
+    
+    cursor.execute(sql, val)
+
+    db_config.commit()
+
+    cursor.close()
+    db_config.close()
