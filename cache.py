@@ -10,7 +10,7 @@ from db_functions import Db
 from aes_encryption import Encrypt
 
 class CacheByMe:
-    def __init__(self):
+    def __init__(self,api_key):
         self.data = dict()
         self.lock = threading.Condition()
         self.city_lock = CityLock()
@@ -18,6 +18,7 @@ class CacheByMe:
         self.db = Db()
         self.limiter = Limiter()
         self.encrypt = Encrypt()
+        self.api_key = api_key
 
     def log(self, message):
 
@@ -77,12 +78,12 @@ class CacheByMe:
 
         self.log(f"😭trying to fetch weather for {city}")
         
-        api_key = self.encrypt.get_api_key()
+        # api_key = self.encrypt.get_api_key()
         
-        self.log(f"💀 API key is {api_key}")
+        self.log(f"💀 API key is {self.api_key}")
 
         response = requests.get(
-            f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid={api_key}"
+            f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid={self.api_key}"
         )
 
         self.log(f"🙌 Done fetching weather for {city} ")

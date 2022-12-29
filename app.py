@@ -26,11 +26,12 @@ app = Flask(__name__)
 
 # public class instances 
 limiter = Limiter()
-cache_instance = CacheByMe()
 lock = threading.Lock()
 db = Db()
 view = Views()
 encrpt = Encrypt()
+api_key = encrpt.get_api_key()
+cache_instance = CacheByMe(api_key)
 
 
 @app.route("/", methods=["GET"])
