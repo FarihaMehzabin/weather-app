@@ -20,6 +20,11 @@ class Hashing:
         self.db.add_to_config("admin_password", hashed)
     
     def compare_password(self, password):
+        
+        hashed = hashlib.sha256(password.encode('utf-8')).hexdigest()
+        
+        print(hashed)
+        
         db = mysql.connector.connect(
   host="localhost",
   user="root",
@@ -33,7 +38,7 @@ class Hashing:
 
         data = cursor.fetchone()
         
-        if password == data[0]:
+        if hashed == data[0]:
             return True
         
         return False
