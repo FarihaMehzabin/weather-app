@@ -1,17 +1,19 @@
 from functools import cache
+from os import abort
 from flask import Flask, request, jsonify, render_template
 import json
 import time
 import requests
 import traceback
 import threading
-from cache import CacheByMe
+from cache import Cache
 from weather_data import WeatherData
 from rate_limiter_for_Ip import Limiter
 from ModifyDict import ModifyDict
 from db_functions import Db
 from views import Views
 from aes_encryption import Encrypt
+from hashing import Hashing
 
 
 config = {
@@ -24,6 +26,7 @@ config = {
 app = Flask(__name__)
 
 
+
 # public class instances 
 limiter = Limiter()
 lock = threading.Lock()
@@ -31,7 +34,8 @@ db = Db()
 view = Views()
 encrpt = Encrypt()
 api_key = encrpt.get_api_key()
-cache_instance = CacheByMe(api_key)
+cache_instance = Cache(api_key)
+hashing = Hashing()
 
 
 @app.route("/", methods=["GET"])
@@ -65,50 +69,19 @@ def user_list():
     return view.return_user_agent_list()
 
 
-@app.route("/logs/log")
+@app.route("/logs/log", methods=["GET"])
 def log_list():
-    return view.return_log_list()
+    
+    password = request.args.get(
+            "password"
+        ) 
+    
+    if hashing.compare_password(password):
+        return view.return_log_list()
+    
+    return "", 403
+    
+    
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, ssl_context=('cert.pem', 'key.pem'))
-# app.run()
-
-
-# @app.errorhandler(500)
-# def internal_error(error):
-#     return jsonify(
-#         message = "Error occurred"
-#         ), 500
-
-
-# @app.errorhandler(404)
-# def internal_error(error):
-#     return jsonify(
-#         message = "Error occurred"
-#         ), 404
-
-
-# print(f"date is {datetime.now().strftime('%H:%M:%S')} and {res['name']}")
-
-
-# now = datetime.now()
-
-# current_time = now.strftime("%H:%M:%S")
-# print("Current Time =", current_time)
-
-
-
-# class TimeoutVar:
-#     """Variable whose values time out."""
-
-#     def __init__(self, value, timeout):
-#         """Store the timeout and value."""
-#         self._value = value
-#         self._last_set = time.time()
-#         self.timeout = timeout
-
-#     @property
-#     def value(self):
-#         """Get the value if the value hasn't timed out."""
-#         if time.time() - self._last_set < self.timeout:
-#             return self._value

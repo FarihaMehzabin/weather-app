@@ -21,8 +21,6 @@ class Encrypt:
         
         encryption_cipher = AES.new(AES_KEY.encode("utf8"), AES.MODE_OPENPGP)
 
-        # use a nonce, e.g when the mode is AES.MODE_EAX
-        #nonce = encryption_cipher.nonce
         ciphertext = encryption_cipher.encrypt(api_key.encode("utf8"))
 
         b64_ciphertext = base64.b64encode(ciphertext).decode()
@@ -50,8 +48,6 @@ class Encrypt:
 
         cursor.close()
         db.close()
-        
-        print(f"{api_key} {len(api_key)}")
         
         unb64_ciphertext = base64.b64decode(api_key.encode())
         iv = unb64_ciphertext[0:18]

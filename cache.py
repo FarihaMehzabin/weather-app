@@ -9,7 +9,7 @@ from ModifyDict import ModifyDict
 from db_functions import Db
 from aes_encryption import Encrypt
 
-class CacheByMe:
+class Cache:
     def __init__(self,api_key):
         self.data = dict()
         self.lock = threading.Condition()

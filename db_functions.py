@@ -33,13 +33,9 @@ class Db:
     cursor = db_config.cursor()
     
     if primary_key:
-      # print(f"CREATE TABLE {table_name} ({primary_key} PRIMARY KEY,{columns})")
-      # print(f"CREATE TABLE {table_name} (ID INT AUTO_INCREMENT PRIMARY KEY,{columns})")
       cursor.execute(f"CREATE TABLE {table_name} ({primary_key} PRIMARY KEY,{columns})")
     else:
-      # print(f"CREATE TABLE {table_name} (ID INT AUTO_INCREMENT PRIMARY KEY,{columns})")
       cursor.execute(f"CREATE TABLE {table_name} (ID INT AUTO_INCREMENT PRIMARY KEY,{columns})")
-
 
     cursor.close()
     db_config.close()
