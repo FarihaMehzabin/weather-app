@@ -9,8 +9,9 @@ load_dotenv()
 GUID = os.getenv('GUID')
 
 class Hashing:
-    def __init__(self):
+    def __init__(self, admin_password):
         self.db = Db()
+        self.admin_pass = admin_password
     
     def hash_password(self, password):
         hashed = hashlib.sha256(password.encode('utf-8')).hexdigest()
@@ -19,12 +20,7 @@ class Hashing:
         
         self.db.add_to_config("admin_password", hashed)
     
-    def compare_password(self, password):
-        
-        hashed = hashlib.sha256(password.encode('utf-8')).hexdigest()
-        
-        print(hashed)
-        
+    def get_admin_password(self):
         db = mysql.connector.connect(
   host="localhost",
   user="root",
@@ -38,7 +34,15 @@ class Hashing:
 
         data = cursor.fetchone()
         
-        if hashed == data[0]:
+        return data[0]
+    
+    def compare_password(self, password):
+        
+        hashed = hashlib.sha256(password.encode('utf-8')).hexdigest()
+        
+        print(hashed)
+        
+        if hashed == self.admin_pass:
             return True
         
         return False

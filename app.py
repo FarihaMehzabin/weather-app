@@ -34,8 +34,9 @@ db = Db()
 view = Views()
 encrpt = Encrypt()
 api_key = encrpt.get_api_key()
+admin_password = encrpt.get_admin_password()
 cache_instance = Cache(api_key)
-hashing = Hashing()
+hashing = Hashing(admin_password)
 
 
 @app.route("/", methods=["GET"])
