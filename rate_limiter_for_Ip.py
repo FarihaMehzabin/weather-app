@@ -2,6 +2,7 @@ from datetime import datetime
 import time
 from flask import jsonify
 import threading
+from collections import Counter
 
 
 class Limiter:
@@ -10,6 +11,8 @@ class Limiter:
     def __init__(self):
         self.ip_list = []
         self.lock = threading.Lock()
+        self.counter = 0
+        self.ip_list_for_counter = []
         
     def log(self, message):
 
@@ -26,20 +29,18 @@ class Limiter:
         if index:
             
             self.lock.acquire()
+                    
+            if int(time.time()) - data[index]["time"] <= 10 and self.counter[ip]<=5:
+                    
+                    self.lock.release()
+                    
+                    return False
             
-            if int(time.time()) - data[index]["time"] > 10:
-                
-                    self._apply_rate_limiter(index, ip)
-                    
-                    self.lock.release()
-                    
-            elif int(time.time()) - data[index]["time"] <= 10:
-                    
-                    self.lock.release()
-                    
-                    return True
+            self._apply_rate_limiter(index, ip)
             
             self.lock.release()
+            
+            return True 
             
         else:
             
@@ -54,6 +55,10 @@ class Limiter:
         for i in range(len(data)):
             
             if data[i]["addr"] == ip:
+                
+                self.ip_list_for_counter.append(ip)
+        
+                self.counter = Counter(self.ip_list_for_counter)
                 
                 self.lock.release()
                 
@@ -71,6 +76,10 @@ class Limiter:
 
         ip_addr_list.append({"addr": f"{ip}", "time": int(time.time())})
         
+        self.ip_list_for_counter.append(ip)
+        
+        self.counter = Counter(self.ip_list_for_counter)
+        
         self.lock.release()
 
     def _apply_rate_limiter(self, index, ip_addr):
@@ -82,9 +91,11 @@ class Limiter:
         
         ip_addr_list.append({"addr": f"{ip_addr}", "time": int(time.time())})
         
+        del self.counter[ip_addr]
+        
         self.lock.release()
         
-    def return_rate_limiter(self):
+    def return_rate_limiter():
         
         limiter_data = jsonify(rate_limit_response="rate limit reached. Please try again in 10 seconds.")
             

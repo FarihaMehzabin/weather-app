@@ -28,7 +28,7 @@ class Cache:
 
         self.db.add_log(log_txt)
 
-    def get_weather_data(self, city, ip_limit=False):
+    def get_weather_data(self, city):
 
         cache_data = self.return_cache_data(city.lower())
 
@@ -66,15 +66,6 @@ class Cache:
 
             return cache_data
 
-        self.log(f"{ip_limit}")
-        
-        if ip_limit:
-
-            self.log(f"ip is limited and data not available for {city}")
-
-            lock_city_up.release()
-
-            return self.limiter.return_rate_limiter()
 
         self.log(f"😭trying to fetch weather for {city}")
         

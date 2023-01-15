@@ -98,3 +98,23 @@ class Db:
 
     cursor.close()
     db_config.close()
+    
+  
+  def get_admin_password():
+        db = mysql.connector.connect(
+  host="localhost",
+  user="root",
+  password="password",
+  database='weather_app'
+)
+
+        cursor = db.cursor()
+
+        cursor.execute("SELECT value FROM config WHERE key_name = 'admin_password'")
+
+        data = cursor.fetchone()
+        
+        cursor.close()
+        db.close()
+        
+        return data[0]

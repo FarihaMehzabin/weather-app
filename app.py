@@ -34,9 +34,8 @@ db = Db()
 view = Views()
 encrpt = Encrypt()
 api_key = encrpt.get_api_key()
-admin_password = encrpt.get_admin_password()
 cache_instance = Cache(api_key)
-hashing = Hashing(admin_password)
+hashing = Hashing()
 
 
 @app.route("/", methods=["GET"])
@@ -51,12 +50,9 @@ def index():
         db.add_user_data(request.headers.get('User-Agent'),ip_addr)
         
         if(limiter.check_if_limited(ip_addr)):
-            
-            return cache_instance.get_weather_data(source.lower(), True)
-            
-        else:
-            
-            return cache_instance.get_weather_data(source.lower())
+            return limiter.return_rate_limiter()
+        
+        return cache_instance.get_weather_data(source.lower())
     
 
     except Exception as err:
